@@ -1,0 +1,45 @@
+put:
+  summary: Update existing data
+  description: Update data in the database by ID.
+  parameters:
+    - in: path
+      name: id
+      type: integer
+      required: true
+      description: ID of the data to update
+    - in: body
+      name: data
+      schema:
+        type: object
+        required:
+          - brand
+          - price
+          - tax
+        properties:
+          brand:
+            type: string
+          price:
+            type: number
+            format: float
+          tax:
+            type: number
+            format: float
+  responses:
+    200:
+      description: Data updated successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    500:
+      description: Error updating data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string

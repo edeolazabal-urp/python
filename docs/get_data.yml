@@ -1,0 +1,64 @@
+openapi: 3.0.0
+info:
+  title: Auto API
+  description: API for retrieving data from the auto table
+  version: 1.0.0
+paths:
+  /data:
+    get:
+      summary: Get all autos
+      description: Retrieve all records from the auto table.
+      responses:
+        '200':
+          description: A list of autos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      description: The auto ID
+                    brand:
+                      type: string
+                      description: The brand of the auto
+                    price:
+                      type: number
+                      format: float
+                      description: The price of the auto
+                    tax:
+                      type: number
+                      format: float
+                      description: The tax applied to the auto
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Bad request, please check your input
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: No records found
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Internal server error

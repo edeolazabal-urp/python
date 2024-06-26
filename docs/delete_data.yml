@@ -1,0 +1,28 @@
+delete:
+  summary: Delete data
+  description: Delete data from the database by ID.
+  parameters:
+    - in: path
+      name: id
+      type: integer
+      required: true
+      description: ID of the data to delete
+  responses:
+    200:
+      description: Data deleted successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    500:
+      description: Error deleting data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string

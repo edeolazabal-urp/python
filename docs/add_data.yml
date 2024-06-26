@@ -1,0 +1,40 @@
+post:
+  summary: Add new data
+  description: Add new data to the database.
+  parameters:
+    - in: body
+      name: data
+      schema:
+        type: object
+        required:
+          - brand
+          - price
+          - tax
+        properties:
+          brand:
+            type: string
+          price:
+            type: number
+            format: float
+          tax:
+            type: number
+            format: float
+  responses:
+    201:
+      description: Data added successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+    500:
+      description: Error adding data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
