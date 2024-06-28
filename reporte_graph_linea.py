@@ -1,53 +1,37 @@
 import datetime
-import io
+from collections import defaultdict
 
-import matplotlib.pyplot as plt
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
 from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer
 
+import rutina_graficos as rutina
 
-class Notas:
-    def __init__(self, pc1, pc2):
-        self.pc1 = pc1
-        self.pc2= pc2
-    def __str__(self):
-        return f'Notas (pc1={self.pc1}, pc2={self.pc2})'
-        
-def obtiene_atributos(obj):    
-    # Obtener todos los atributos y métodos del objeto
-    atributos_y_metodos = dir(obj)
+
+def archivo_a_arreglo(nombre_archivo):
+    datos, categorias, valores = [], [], []
+    # Crear un diccionario para almacenar la suma de importes por mes
+    with open(nombre_archivo, 'r') as archivo:
+        encabezado = archivo.readline() # Leer la primera línea (encabezado
+        for linea in archivo:
+            dato = linea.strip('\n').split(';')
+            datos.append((dato[1], int(dato[2])))
     
-    # Filtrar sólo los atributos
-    nombres_atributos = [attr for attr in atributos_y_metodos if not callable(getattr(obj, attr)) and not attr.startswith("__")]
-    valores_atributos = [getattr(obj, attr) for attr in nombres_atributos]
+    importes_por_mes = defaultdict(int)
 
-    return nombres_atributos, valores_atributos
-    
-def generar_grafico(obj):
-    # Datos para el gráfico de barras
-    categorias, valores = obtiene_atributos(obj)
+    # Filtrar y sumar los importes válidos por mes
+    for mes, importe in datos:
+        if 0 <= importe < 1000:
+            importes_por_mes[mes] += importe
 
-    # Generar el gráfico de barras
-    colores = ['ligthgreen', 'purple', 'orange', 'deeppink', 'skyblue', 'lightcoral', 'blue', 'red', 'green']
-    # plt.bar(categorias, valores, color='lightgreen')
-    plt.plot(categorias, valores, marker='o', color='green', linestyle='-')
-    plt.xlabel('Categorías')
-    plt.ylabel('Valores')
-    plt.title('Gráfico de Barras')
+    # Convertir el diccionario en una lista de tuplas (mes, suma_importes)
+    categorias = list(importes_por_mes.keys())
+    valores = list(importes_por_mes.values())
 
-    # Convertir el gráfico a un formato compatible con ReportLab
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    
-    # Limpiar la figura de Matplotlib
-    plt.clf()
+    return categorias, valores    
 
-    return buffer
-
-def generar_reporte_con_imagen(nombre, obj):
+def generar_reporte_con_imagen(nombre, categorias, valores, tipo_grafico):
     # Crear un documento PDF
     fecha = datetime.datetime.now().strftime("%d-%m-%Y_%H%M%S")
 
@@ -69,20 +53,12 @@ def generar_reporte_con_imagen(nombre, obj):
     contenido = []
     
     # Título
-    contenido.append(Paragraph("Certificado", estilo_titulo))
+    contenido.append(Paragraph(nombre, estilo_titulo))
     contenido.append(Spacer(1, 12))
     
     # Texto descriptivo
     texto = """
-    La Universidad Ricardo Palma certifica que el alumno 
-    """
-    contenido.append(Paragraph(texto, estilo_normal))
-    contenido.append(Spacer(1, 12))
-    texto = nombre
-    contenido.append(Paragraph(texto, estilo_titulo))
-    contenido.append(Spacer(1, 12))
-    texto = """
-    Ha completado con exito el curso Python de 48 horas de duración, obteniendo las siguientes notas:
+    Se presenta el gráfico de barras con las categorías y valores correspondientes.
     """
     contenido.append(Paragraph(texto, estilo_normal))
     contenido.append(Spacer(1, 12))
@@ -102,7 +78,7 @@ def generar_reporte_con_imagen(nombre, obj):
     '''
     
     # Generar el gráfico y convertirlo a formato compatible con ReportLab
-    buffer = generar_grafico(obj)
+    buffer = rutina.generar_grafico(categorias, valores, tipo_grafico)
     
     # Convertir la imagen de bytes a Image de ReportLab
     imagen = Image(buffer, width=6*inch, height=4*inch)
@@ -114,5 +90,5 @@ def generar_reporte_con_imagen(nombre, obj):
     doc.build(contenido)
 
 if __name__ == "__main__":
-    generar_reporte_con_imagen('Juan Perez', Notas(11, 12))
-    
+    categorias, valores = archivo_a_arreglo('gastos.csv')
+    generar_reporte_con_imagen('Reporte de Gastos', categorias, valores, 'pie')
